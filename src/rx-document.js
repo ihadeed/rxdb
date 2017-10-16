@@ -171,6 +171,8 @@ export class RxDocument {
         if (!schemaObj.ref)
             throw new Error(`cannot populate because path has no ref (${path})`);
 
+        schemaObj.ref = schemaObj.ref.toLowerCase();
+
         const refCollection = this.collection.database.collections[schemaObj.ref];
         if (!refCollection)
             throw new Error(`ref-collection (${schemaObj.ref}) not in database`);

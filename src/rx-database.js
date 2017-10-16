@@ -224,6 +224,8 @@ export class RxDatabase {
         if (args.name.charAt(0) === '_')
             throw new Error(`collection(${args.name}): collection-names cannot start with underscore _`);
 
+        args.name = args.name.toLowerCase();
+
         if (this.collections[args.name])
             throw new Error(`collection(${args.name}) already exists. use myDatabase.${args.name} to get it`);
 
