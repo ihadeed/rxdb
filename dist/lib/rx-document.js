@@ -176,6 +176,15 @@ var RxDocument = exports.RxDocument = function () {
         value: function get$(path) {
             if (path.includes('.item.')) throw new Error('cannot get observable of in-array fields because order cannot be guessed: ' + path);
 
+            if (path === this.primaryPath) throw _rxError2['default'].newRxError('cannot observe primary path');
+
+            // final fields cannot be modified
+            if (this.collection.schema.finalFields.includes(path)) {
+                throw _rxError2['default'].newRxError('final fields cannot be observed', {
+                    path: path
+                });
+            }
+
             var schemaObj = this.collection.schema.getSchemaByObjectPath(path);
             if (!schemaObj) throw new Error('cannot observe a non-existed field (' + path + ')');
 
@@ -197,6 +206,8 @@ var RxDocument = exports.RxDocument = function () {
             var value = this.get(path);
             if (!schemaObj) throw new Error('cannot populate a non-existed field (' + path + ')');
             if (!schemaObj.ref) throw new Error('cannot populate because path has no ref (' + path + ')');
+
+            schemaObj.ref = schemaObj.ref.toLowerCase();
 
             var refCollection = this.collection.database.collections[schemaObj.ref];
             if (!refCollection) throw new Error('ref-collection (' + schemaObj.ref + ') not in database');
@@ -285,9 +296,20 @@ var RxDocument = exports.RxDocument = function () {
         key: 'set',
         value: function set(objPath, value) {
             if (typeof objPath !== 'string') throw new TypeError('RxDocument.set(): objPath must be a string');
+
+            // primary cannot be modified
             if (!this._isTemporary && objPath === this.primaryPath) {
                 throw new Error('RxDocument.set(): primary-key (' + this.primaryPath + ')\n                cannot be modified');
             }
+
+            // final fields cannot be modified
+            if (!this._isTemporary && this.collection.schema.finalFields.includes(objPath)) {
+                throw _rxError2['default'].newRxError('final fields cannot be modified', {
+                    path: objPath,
+                    value: value
+                });
+            }
+
             // check if equal
             if (Object.is(this.get(objPath), value)) return;
 

@@ -2199,13 +2199,14 @@ var _rxQuery = require('../rx-query');
 
 var _rxQuery2 = _interopRequireDefault(_rxQuery);
 
+var _rxError = require('../rx-error');
+
+var _rxError2 = _interopRequireDefault(_rxError);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-/**
- * this plugin adds the json export/import capabilities to RxDB
- */
 var dumpRxDatabase = function () {
     var _ref = (0, _asyncToGenerator3['default'])( /*#__PURE__*/_regenerator2['default'].mark(function _callee() {
         var _this = this;
@@ -2258,23 +2259,45 @@ var dumpRxDatabase = function () {
     return function dumpRxDatabase() {
         return _ref.apply(this, arguments);
     };
-}();
+}(); /**
+      * this plugin adds the json export/import capabilities to RxDB
+      */
+
 
 var importDumpRxDatabase = function () {
     var _ref2 = (0, _asyncToGenerator3['default'])( /*#__PURE__*/_regenerator2['default'].mark(function _callee2(dump) {
         var _this2 = this;
 
+        var missingCollections;
         return _regenerator2['default'].wrap(function _callee2$(_context2) {
             while (1) {
                 switch (_context2.prev = _context2.next) {
                     case 0:
-                        return _context2.abrupt('return', Promise.all(dump.collections.filter(function (colDump) {
-                            return _this2.collections[colDump.name];
-                        }).map(function (colDump) {
+                        /**
+                         * collections must be created before the import
+                         * because we do not know about the other collection-settings here
+                         */
+                        missingCollections = dump.collections.filter(function (col) {
+                            return !_this2.collections[col.name];
+                        }).map(function (col) {
+                            return col.name;
+                        });
+
+                        if (!(missingCollections.length > 0)) {
+                            _context2.next = 3;
+                            break;
+                        }
+
+                        throw _rxError2['default'].newRxError('You must create the collections before you can import their data', {
+                            missingCollections: missingCollections
+                        });
+
+                    case 3:
+                        return _context2.abrupt('return', Promise.all(dump.collections.map(function (colDump) {
                             return _this2.collections[colDump.name].importDump(colDump);
                         })));
 
-                    case 1:
+                    case 4:
                     case 'end':
                         return _context2.stop();
                 }
@@ -2409,7 +2432,7 @@ exports['default'] = {
     overwritable: overwritable
 };
 
-},{"../rx-query":31,"../util":34,"babel-runtime/helpers/asyncToGenerator":45,"babel-runtime/regenerator":53}],16:[function(require,module,exports){
+},{"../rx-error":30,"../rx-query":31,"../util":34,"babel-runtime/helpers/asyncToGenerator":45,"babel-runtime/regenerator":53}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6930,22 +6953,25 @@ var RxDatabase = exports.RxDatabase = function () {
                                 throw new Error('collection(' + args.name + '): collection-names cannot start with underscore _');
 
                             case 3:
+
+                                args.name = args.name.toLowerCase();
+
                                 if (!this.collections[args.name]) {
-                                    _context4.next = 5;
+                                    _context4.next = 6;
                                     break;
                                 }
 
                                 throw new Error('collection(' + args.name + ') already exists. use myDatabase.' + args.name + ' to get it');
 
-                            case 5:
+                            case 6:
                                 if (args.schema) {
-                                    _context4.next = 7;
+                                    _context4.next = 8;
                                     break;
                                 }
 
                                 throw new Error('collection(' + args.name + '): schema is missing');
 
-                            case 7:
+                            case 8:
 
                                 if (!_rxSchema2['default'].isInstanceOf(args.schema)) args.schema = _rxSchema2['default'].create(args.schema);
 
@@ -6954,62 +6980,62 @@ var RxDatabase = exports.RxDatabase = function () {
                                 // check unallowed collection-names
 
                                 if (!properties().includes(args.name)) {
-                                    _context4.next = 11;
+                                    _context4.next = 12;
                                     break;
                                 }
 
                                 throw new Error('Collection-name ' + args.name + ' not allowed');
 
-                            case 11:
+                            case 12:
 
                                 // check schemaHash
                                 schemaHash = args.schema.hash;
                                 collectionDoc = null;
-                                _context4.prev = 13;
-                                _context4.next = 16;
+                                _context4.prev = 14;
+                                _context4.next = 17;
                                 return this.lockedRun(function () {
                                     return _this4._collectionsPouch.get(internalPrimary);
                                 });
 
-                            case 16:
+                            case 17:
                                 collectionDoc = _context4.sent;
-                                _context4.next = 21;
+                                _context4.next = 22;
                                 break;
 
-                            case 19:
-                                _context4.prev = 19;
-                                _context4.t0 = _context4['catch'](13);
+                            case 20:
+                                _context4.prev = 20;
+                                _context4.t0 = _context4['catch'](14);
 
-                            case 21:
+                            case 22:
                                 if (!(collectionDoc && collectionDoc.schemaHash !== schemaHash)) {
-                                    _context4.next = 23;
+                                    _context4.next = 24;
                                     break;
                                 }
 
                                 throw new Error('collection(' + args.name + '): another instance created this collection with a different schema');
 
-                            case 23:
-                                _context4.next = 25;
+                            case 24:
+                                _context4.next = 26;
                                 return _rxCollection2['default'].create(args);
 
-                            case 25:
+                            case 26:
                                 collection = _context4.sent;
 
                                 if (!(Object.keys(collection.schema.encryptedPaths).length > 0 && !this.password)) {
-                                    _context4.next = 28;
+                                    _context4.next = 29;
                                     break;
                                 }
 
                                 throw new Error('collection(' + args.name + '): schema encrypted but no password given');
 
-                            case 28:
+                            case 29:
                                 if (collectionDoc) {
-                                    _context4.next = 36;
+                                    _context4.next = 37;
                                     break;
                                 }
 
-                                _context4.prev = 29;
-                                _context4.next = 32;
+                                _context4.prev = 30;
+                                _context4.next = 33;
                                 return this.lockedRun(function () {
                                     return _this4._collectionsPouch.put({
                                         _id: internalPrimary,
@@ -7019,15 +7045,15 @@ var RxDatabase = exports.RxDatabase = function () {
                                     });
                                 });
 
-                            case 32:
-                                _context4.next = 36;
+                            case 33:
+                                _context4.next = 37;
                                 break;
 
-                            case 34:
-                                _context4.prev = 34;
-                                _context4.t1 = _context4['catch'](29);
+                            case 35:
+                                _context4.prev = 35;
+                                _context4.t1 = _context4['catch'](30);
 
-                            case 36:
+                            case 37:
                                 cEvent = _rxChangeEvent2['default'].create('RxDatabase.collection', this);
 
                                 cEvent.data.v = collection.name;
@@ -7041,12 +7067,12 @@ var RxDatabase = exports.RxDatabase = function () {
 
                                 return _context4.abrupt('return', collection);
 
-                            case 43:
+                            case 44:
                             case 'end':
                                 return _context4.stop();
                         }
                     }
-                }, _callee4, this, [[13, 19], [29, 34]]);
+                }, _callee4, this, [[14, 20], [30, 35]]);
             }));
 
             function collection(_x3) {
@@ -7547,6 +7573,15 @@ var RxDocument = exports.RxDocument = function () {
         value: function get$(path) {
             if (path.includes('.item.')) throw new Error('cannot get observable of in-array fields because order cannot be guessed: ' + path);
 
+            if (path === this.primaryPath) throw _rxError2['default'].newRxError('cannot observe primary path');
+
+            // final fields cannot be modified
+            if (this.collection.schema.finalFields.includes(path)) {
+                throw _rxError2['default'].newRxError('final fields cannot be observed', {
+                    path: path
+                });
+            }
+
             var schemaObj = this.collection.schema.getSchemaByObjectPath(path);
             if (!schemaObj) throw new Error('cannot observe a non-existed field (' + path + ')');
 
@@ -7568,6 +7603,8 @@ var RxDocument = exports.RxDocument = function () {
             var value = this.get(path);
             if (!schemaObj) throw new Error('cannot populate a non-existed field (' + path + ')');
             if (!schemaObj.ref) throw new Error('cannot populate because path has no ref (' + path + ')');
+
+            schemaObj.ref = schemaObj.ref.toLowerCase();
 
             var refCollection = this.collection.database.collections[schemaObj.ref];
             if (!refCollection) throw new Error('ref-collection (' + schemaObj.ref + ') not in database');
@@ -7656,9 +7693,20 @@ var RxDocument = exports.RxDocument = function () {
         key: 'set',
         value: function set(objPath, value) {
             if (typeof objPath !== 'string') throw new TypeError('RxDocument.set(): objPath must be a string');
+
+            // primary cannot be modified
             if (!this._isTemporary && objPath === this.primaryPath) {
                 throw new Error('RxDocument.set(): primary-key (' + this.primaryPath + ')\n                cannot be modified');
             }
+
+            // final fields cannot be modified
+            if (!this._isTemporary && this.collection.schema.finalFields.includes(objPath)) {
+                throw _rxError2['default'].newRxError('final fields cannot be modified', {
+                    path: objPath,
+                    value: value
+                });
+            }
+
             // check if equal
             if (Object.is(this.get(objPath), value)) return;
 
@@ -8836,6 +8884,7 @@ exports.getEncryptedPaths = getEncryptedPaths;
 exports.hasCrypt = hasCrypt;
 exports.getIndexes = getIndexes;
 exports.getPrimary = getPrimary;
+exports.getFinalFields = getFinalFields;
 exports.normalize = normalize;
 exports.create = create;
 exports.isInstanceOf = isInstanceOf;
@@ -8869,7 +8918,6 @@ var RxSchema = exports.RxSchema = function () {
         (0, _classCallCheck3['default'])(this, RxSchema);
 
         this.jsonID = jsonID;
-
         this.compoundIndexes = this.jsonID.compoundIndexes;
 
         // make indexes required
@@ -8888,6 +8936,12 @@ var RxSchema = exports.RxSchema = function () {
         // primary is always required
         this.primaryPath = getPrimary(this.jsonID);
         if (this.primaryPath) this.jsonID.required.push(this.primaryPath);
+
+        // final fields are always required
+        this.finalFields = getFinalFields(this.jsonID);
+        this.jsonID.required = this.jsonID.required.concat(this.finalFields).filter(function (elem, pos, arr) {
+            return arr.indexOf(elem) === pos;
+        }); // unique;
 
         // add primary to schema if not there (if _id)
         if (!this.jsonID.properties[this.primaryPath]) {
@@ -9028,7 +9082,8 @@ var RxSchema = exports.RxSchema = function () {
                 Object.entries(this.normalized.properties).filter(function (entry) {
                     return entry[1]['default'];
                 }).forEach(function (entry) {
-                    return _this3._defaultValues[entry[0]] = entry[1]['default'];
+                    var defaultValue = entry[1]['default'];
+                    _this3._defaultValues[entry[0]] = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
                 });
             }
             return this._defaultValues;
@@ -9131,6 +9186,17 @@ function getPrimary(jsonID) {
 }
 
 /**
+ * returns the final-fields of the schema
+ * @param  {Object} jsonId
+ * @return {string[]} field-names of the final-fields
+ */
+function getFinalFields(jsonId) {
+    return Object.keys(jsonId.properties).filter(function (key) {
+        return jsonId.properties[key].final;
+    });
+}
+
+/**
  * orders the schemas attributes by alphabetical order
  * @param {Object} jsonSchema
  * @return {Object} jsonSchema - ordered
@@ -9190,6 +9256,7 @@ exports['default'] = {
     hasCrypt: hasCrypt,
     getIndexes: getIndexes,
     getPrimary: getPrimary,
+    getFinalFields: getFinalFields,
     normalize: normalize,
     create: create,
     isInstanceOf: isInstanceOf
@@ -11260,7 +11327,7 @@ function fromByteArray (uint8) {
 /*!
  * The buffer module from node.js, for the browser.
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 /* eslint-disable no-proto */

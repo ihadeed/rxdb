@@ -14,7 +14,6 @@ export var RxSchema = function () {
         _classCallCheck(this, RxSchema);
 
         this.jsonID = jsonID;
-
         this.compoundIndexes = this.jsonID.compoundIndexes;
 
         // make indexes required
@@ -33,6 +32,12 @@ export var RxSchema = function () {
         // primary is always required
         this.primaryPath = getPrimary(this.jsonID);
         if (this.primaryPath) this.jsonID.required.push(this.primaryPath);
+
+        // final fields are always required
+        this.finalFields = getFinalFields(this.jsonID);
+        this.jsonID.required = this.jsonID.required.concat(this.finalFields).filter(function (elem, pos, arr) {
+            return arr.indexOf(elem) === pos;
+        }); // unique;
 
         // add primary to schema if not there (if _id)
         if (!this.jsonID.properties[this.primaryPath]) {
@@ -163,7 +168,8 @@ export var RxSchema = function () {
                 Object.entries(this.normalized.properties).filter(function (entry) {
                     return entry[1]['default'];
                 }).forEach(function (entry) {
-                    return _this3._defaultValues[entry[0]] = entry[1]['default'];
+                    var defaultValue = entry[1]['default'];
+                    _this3._defaultValues[entry[0]] = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
                 });
             }
             return this._defaultValues;
@@ -265,6 +271,17 @@ export function getPrimary(jsonID) {
 }
 
 /**
+ * returns the final-fields of the schema
+ * @param  {Object} jsonId
+ * @return {string[]} field-names of the final-fields
+ */
+export function getFinalFields(jsonId) {
+    return Object.keys(jsonId.properties).filter(function (key) {
+        return jsonId.properties[key].final;
+    });
+}
+
+/**
  * orders the schemas attributes by alphabetical order
  * @param {Object} jsonSchema
  * @return {Object} jsonSchema - ordered
@@ -324,6 +341,7 @@ export default {
     hasCrypt: hasCrypt,
     getIndexes: getIndexes,
     getPrimary: getPrimary,
+    getFinalFields: getFinalFields,
     normalize: normalize,
     create: create,
     isInstanceOf: isInstanceOf
