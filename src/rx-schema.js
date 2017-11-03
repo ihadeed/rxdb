@@ -190,7 +190,7 @@ export function getEncryptedPaths(jsonSchema) {
             traverse(currentObj[attributeName], nextPath);
         }
     }
-    traverse(jsonSchema, '');
+    traverse(jsonSchema.properties, '');
     return ret;
 }
 
@@ -293,6 +293,12 @@ const fillWithDefaultSettings = function(schemaObj) {
         type: 'string',
         minLength: 1
     };
+
+    // add attachments
+    schemaObj.properties._attachments = {
+        type: 'object'
+    };
+
 
     // version is 0 by default
     schemaObj.version = schemaObj.version || 0;
