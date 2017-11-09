@@ -92,10 +92,7 @@ export class RxSchema {
             this._defaultValues = {};
             Object.entries(this.normalized.properties)
                 .filter(entry => entry[1].default)
-                .forEach(entry => {
-                    const defaultValue = entry[1].default;
-                    this._defaultValues[entry[0]] = typeof defaultValue === 'function'? defaultValue() : defaultValue;
-                });
+                .forEach(entry => this._defaultValues[entry[0]] = entry[1].default);
         }
         return this._defaultValues;
     }
@@ -190,7 +187,7 @@ export function getEncryptedPaths(jsonSchema) {
             traverse(currentObj[attributeName], nextPath);
         }
     }
-    traverse(jsonSchema, '');
+    traverse(jsonSchema.properties, '');
     return ret;
 }
 
@@ -293,6 +290,12 @@ const fillWithDefaultSettings = function(schemaObj) {
         type: 'string',
         minLength: 1
     };
+
+    // add attachments
+    schemaObj.properties._attachments = {
+        type: 'object'
+    };
+
 
     // version is 0 by default
     schemaObj.version = schemaObj.version || 0;

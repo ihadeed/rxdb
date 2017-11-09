@@ -219,8 +219,7 @@ var RxSchema = exports.RxSchema = function () {
                 Object.entries(this.normalized.properties).filter(function (entry) {
                     return entry[1]['default'];
                 }).forEach(function (entry) {
-                    var defaultValue = entry[1]['default'];
-                    _this3._defaultValues[entry[0]] = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+                    return _this3._defaultValues[entry[0]] = entry[1]['default'];
                 });
             }
             return this._defaultValues;
@@ -268,7 +267,7 @@ function getEncryptedPaths(jsonSchema) {
             traverse(currentObj[attributeName], nextPath);
         }
     }
-    traverse(jsonSchema, '');
+    traverse(jsonSchema.properties, '');
     return ret;
 }
 
@@ -366,6 +365,11 @@ var fillWithDefaultSettings = function fillWithDefaultSettings(schemaObj) {
     schemaObj.properties._rev = {
         type: 'string',
         minLength: 1
+    };
+
+    // add attachments
+    schemaObj.properties._attachments = {
+        type: 'object'
     };
 
     // version is 0 by default
