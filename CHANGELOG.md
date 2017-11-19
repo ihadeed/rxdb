@@ -1,23 +1,34 @@
 # Changelog
 
-## 7.0.0 (coming soon)
-
-Features:
-    - Added [attachments](https://pubkey.github.io/rxdb/rx-attachment.html)
-    - Added [final fields](https://pubkey.github.io/rxdb/rx-schema.html#final)
-    - Added [inMemory](https://pubkey.github.io/rxdb/in-memory.html)-collections
-
-Breaking:
-    - Renamed `ingoreDuplicate` to `ingoreDuplicate` [#314](https://github.com/pubkey/rxdb/issues/314)
-    - Improved typings [#329](https://github.com/pubkey/rxdb/pull/329) by @ihadeed
-
-Bugfixes:
-    - Added error-message when you json-import on a non-existing collection [#319](https://github.com/pubkey/rxdb/issues/319)
-    - Allow windows-foldernames (with backslash) as collection-name [343](https://github.com/pubkey/rxdb/issues/343)
+## X.X.X (coming soon)
 
 Other:
-    - Split out idle-queue into own [npm-module](http://npmjs.com/package/custom-idle-queue)
-    - Enfore usage of strict-equality via eslint
+  - Reduced build-size by using [rxjs-lettable-operators](https://github.com/ReactiveX/rxjs/blob/master/doc/lettable-operators.md)
+
+## 7.0.1 (November 14, 2017)
+
+Bugfixes:
+  - Include `pouchdb-adapter-memory` as dependency [#365](https://github.com/pubkey/rxdb/issues/365)
+
+## 7.0.0 (November 14, 2017)
+
+Breaking:
+  - Renamed `ingoreDuplicate` to `ingoreDuplicate` [#314](https://github.com/pubkey/rxdb/issues/314)
+  - Improved typings [#329](https://github.com/pubkey/rxdb/pull/329) by @ihadeed
+
+Features:
+  - Added [attachments](https://pubkey.github.io/rxdb/rx-attachment.html)
+  - Added [final fields](https://pubkey.github.io/rxdb/rx-schema.html#final)
+  - Added [inMemory](https://pubkey.github.io/rxdb/in-memory.html)-collections
+  - Added [local documents](https://pubkey.github.io/rxdb/rx-local-document.html)
+
+Bugfixes:
+  - Added error-message when you json-import on a non-existing collection [#319](https://github.com/pubkey/rxdb/issues/319)
+  - Allow windows-foldernames (with backslash) as collection-name [343](https://github.com/pubkey/rxdb/issues/343)
+
+Other:
+  - Split out idle-queue into own [npm-module](http://npmjs.com/package/custom-idle-queue)
+  - Enfore usage of strict-equality via eslint
 
 ## 6.0.1 (September 20, 2017)
 

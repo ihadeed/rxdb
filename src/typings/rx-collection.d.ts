@@ -18,7 +18,8 @@ import {
     RxChangeEvent
 } from './rx-change-event';
 import {
-    RxDocument
+    RxDocument,
+    RxLocalDocument
 } from './rx-document';
 
 export interface RxCollectionCreator {
@@ -61,7 +62,7 @@ export interface SyncOptions {
     },
     // for options see https://pouchdb.com/api.html#replication
     options?: PouchReplicationOptions,
-    query?: RxQuery<any>
+    query?: RxQuery
 }
 
 export declare class RxCollection<RxDocumentType> {
@@ -74,8 +75,8 @@ export declare class RxCollection<RxDocumentType> {
     newDocument(json: Partial<RxDocumentType>): RxDocument<RxDocumentType>;
     upsert(json: Partial<RxDocumentType>): Promise<RxDocument<RxDocumentType>>;
     atomicUpsert(json: Partial<RxDocumentType>): Promise<RxDocument<RxDocumentType>>;
-    find(queryObj?: any): RxQuery<RxDocument<RxDocumentType>[]>;
-    findOne(queryObj?: any): RxQuery<RxDocument<RxDocumentType>>;
+    find(queryObj?: any): RxQuery<RxDocumentType, RxDocument<RxDocumentType>[]>;
+    findOne(queryObj?: any): RxQuery<RxDocumentType, RxDocument<RxDocumentType>>;
 
     dump(decrytped: boolean): Promise<any>;
     importDump(exportedJSON: any): Promise<Boolean>;
@@ -111,6 +112,10 @@ export declare class RxCollection<RxDocumentType> {
      * creates an in-memory replicated version of this collection
      */
     inMemory(): Promise<RxCollection<RxDocumentType>>;
+
+    insertLocal(id: string, data: any): Promise<RxLocalDocument<RxCollection<RxDocumentType>>>;
+    upsertLocal(id: string, data: any): Promise<RxLocalDocument<RxCollection<RxDocumentType>>>;
+    getLocal(id: string): Promise<RxLocalDocument<RxCollection<RxDocumentType>>>;
 
     destroy(): Promise<boolean>;
     remove(): Promise<any>;

@@ -5,6 +5,12 @@ os:
 node_js:
   - "7"
 
+cache:
+  directories:
+  - node_modules # NPM packages
+  - examples/angular2/node_modules
+  - examples/vue/node_modules
+
 before_install:
   - export CHROME_BIN=chromium-browser
   - export DISPLAY=:99.0
@@ -14,6 +20,7 @@ script:
 - npm run test:node
 - npm run test:browser
 - npm run test:typings
+- npm run test:deps
 - npm run build
 - npm run lint
 - (cd ./examples/angular2 && npm install --silent && npm run build && npm run test:build)
