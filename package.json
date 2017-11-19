@@ -53,9 +53,6 @@
     "dev": "watch 'npm run test:node' src/ test/",
     "dev:example": "watch 'npm run transpile:src && echo \"done\"' src/ test/"
   },
-  "pre-commit": [
-    "lint"
-  ],
   "peerDependencies": {
     "rxjs": "^5.5.2"
   },
@@ -147,7 +144,6 @@
     "pouchdb-adapter-localstorage": "6.3.4",
     "pouchdb-adapter-node-websql": "6.3.4",
     "pouchdb-adapter-websql": "6.3.4",
-    "pre-commit": "1.2.2",
     "random-int": "1.0.0",
     "request": "2.83.0",
     "request-promise": "4.2.2",
