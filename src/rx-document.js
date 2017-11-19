@@ -281,8 +281,8 @@ export class RxDocument {
         }
 
         // check schema of changed field
-        if (!this._isTemporary)
-            this.collection.schema.validate(value, objPath);
+        // if (!this._isTemporary)
+        //     this.collection.schema.validate(value, objPath);
 
         objectPath.set(this._data, objPath, value);
         return this;
